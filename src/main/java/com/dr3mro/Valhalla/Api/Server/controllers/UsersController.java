@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,26 +21,33 @@ import com.dr3mro.Valhalla.Api.Server.dto.UserUpdateRequest;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.services.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Validated
 public class UsersController {
 
     private final UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User CreateUser(@RequestBody UserCreateRequest userRequest) {
+    public UserResponse CreateUser(@Valid @RequestBody UserCreateRequest userRequest) {
         User user = User.builder()
                 .name(userRequest.getName())
                 .email(userRequest.getEmail())
                 .password(userRequest.getPassword())
                 .build();
 
-        userService.createUser(user);
-        return user;
+        User createdUser = userService.createUser(user);
+
+        return UserResponse.builder()
+                .id(createdUser.getId())
+                .name(createdUser.getName())
+                .email(createdUser.getEmail())
+                .build();
     }
 
     @DeleteMapping("/{userId}")

@@ -27,7 +27,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final PasswordValidator passwordValidator;
 
-    public void createUser(User user) {
+    public User createUser(User user) {
         // normalize email
         if (user.getEmail() != null) {
             user.setEmail(user.getEmail().trim().toLowerCase());
@@ -39,17 +39,18 @@ public class UserService {
         }
 
         if (user.getPassword() != null) {
-            if (!passwordIsInvalid(new PasswordData(user.getPassword()))) {
+            if (!passwordIsStrong(new PasswordData(user.getPassword()))) {
                 throw new InvalidPasswordException("Invalid password constraints.");
             }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
         log.info("User created: {}", user.getEmail());
+        return savedUser;
     }
 
-    private boolean passwordIsInvalid(PasswordData password) {
+    private boolean passwordIsStrong(PasswordData password) {
         return passwordValidator.validate(password).isValid();
     }
 

@@ -12,7 +12,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Collections;
 import java.util.List;
 
+import com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException;
+import org.junit.jupiter.api.function.Executable;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class UserServiceTest {
@@ -44,6 +48,21 @@ class UserServiceTest {
 
         assertEquals("encodedPassword", user.getPassword());
         verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void createUser_withDuplicateEmail_throwsDuplicateEmailException() {
+        User user = new User();
+        user.setName("Test User");
+        user.setEmail("test@example.com");
+        user.setPassword("password");
+
+        when(userRepository.existsByEmailIgnoreCase("test@example.com")).thenReturn(true);
+
+        Executable executable = () -> userService.createUser(user);
+
+        assertThrows(DuplicateEmailException.class, executable);
+        verify(userRepository, never()).save(user);
     }
 
     @Test

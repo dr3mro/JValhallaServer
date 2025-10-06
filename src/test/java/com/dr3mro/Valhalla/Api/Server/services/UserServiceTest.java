@@ -1,23 +1,24 @@
 package com.dr3mro.Valhalla.Api.Server.services;
 
-import com.dr3mro.Valhalla.Api.Server.models.User;
-import com.dr3mro.Valhalla.Api.Server.repositories.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
-import com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException;
+import com.dr3mro.Valhalla.Api.Server.models.User;
+import com.dr3mro.Valhalla.Api.Server.repositories.UserRepository;
 
 class UserServiceTest {
 
@@ -29,11 +30,6 @@ class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void createUser() {

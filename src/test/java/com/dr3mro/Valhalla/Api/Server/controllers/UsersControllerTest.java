@@ -1,24 +1,25 @@
 package com.dr3mro.Valhalla.Api.Server.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
 import com.dr3mro.Valhalla.Api.Server.dto.UserCreateRequest;
 import com.dr3mro.Valhalla.Api.Server.dto.UserResponse;
+import com.dr3mro.Valhalla.Api.Server.dto.UserUpdateRequest;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.services.UserService;
 
@@ -43,6 +44,13 @@ class UsersControllerTest {
         userRequest.setEmail("test@example.com");
         userRequest.setPassword("password");
 
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setName("Test User");
+        user.setEmail("test@example.com");
+
+        when(userService.createUser(any(User.class))).thenReturn(user);
+
         usersController.CreateUser(userRequest);
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -55,13 +63,13 @@ class UsersControllerTest {
 
     @Test
     void listUsers() {
-        User user = new User();
+        UserResponse user = new UserResponse();
         user.setName("Test User");
         user.setEmail("test@example.com");
 
         when(userService.listUsers()).thenReturn(Collections.singletonList(user));
 
-        List<User> users = usersController.ListUsers();
+        List<UserResponse> users = usersController.ListUsers();
 
         assertEquals(1, users.size());
         assertEquals("Test User", users.get(0).getName());
@@ -76,31 +84,39 @@ class UsersControllerTest {
     }
 
     @Test
-    void CreateUserThenDeleteUser() {
-        UserCreateRequest userRequest = new UserCreateRequest();
+    void getUser() {
+        UserResponse user = new UserResponse();
+        user.setName("Test User");
+        user.setEmail("test@example.com");
+
+        when(userService.getUser(any(UUID.class))).thenReturn(user);
+
+        UserResponse returnedUser = usersController.GetUser(UUID.randomUUID().toString());
+
+        assertEquals(user.getName(), returnedUser.getName());
+        assertEquals(user.getEmail(), returnedUser.getEmail());
+        verify(userService, times(1)).getUser(any(UUID.class));
+    }
+
+    @Test
+    void updateUser() {
+        UserUpdateRequest userRequest = new UserUpdateRequest();
         userRequest.setName("Test User");
         userRequest.setEmail("test@example.com");
-        userRequest.setPassword("password");
 
-        doAnswer(invocation -> {
-            User u = invocation.getArgument(0);
-            u.setId(UUID.randomUUID());
-            return null;
-        }).when(userService).createUser(any(User.class));
+        UserResponse user = new UserResponse();
+        user.setName("Test User");
+        user.setEmail("test@example.com");
 
-        UserResponse createdUser = usersController.CreateUser(userRequest);
-        // verify create call and the created user's fields
+        when(userService.updateUser(any(User.class))).thenReturn(user);
+
+        usersController.UpdateUser(UUID.randomUUID().toString(), userRequest);
+
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        verify(userService, times(1)).createUser(captor.capture());
+        verify(userService, times(1)).updateUser(captor.capture());
         User passed = captor.getValue();
+        assertEquals(userRequest.getName(), passed.getName());
         assertEquals(userRequest.getEmail(), passed.getEmail());
-        // also assert controller returned a user with same fields and an id was set
-        assertEquals(userRequest.getEmail(), createdUser.getEmail());
-        assertEquals(passed.getId(), createdUser.getId());
-
-        // now delete: use a valid UUID as controller expects a UUID string and forwards UUID to service
-        UUID userId = UUID.randomUUID();
-        usersController.DeleteUser(userId.toString());
-        verify(userService, times(1)).deleteUser(userId);
     }
+
 }

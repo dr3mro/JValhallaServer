@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dr3mro.Valhalla.Api.Server.dto.UserRequest;
+import com.dr3mro.Valhalla.Api.Server.dto.UserCreateRequest;
+import com.dr3mro.Valhalla.Api.Server.dto.UserUpdateRequest;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.services.UserService;
 
@@ -28,7 +30,7 @@ public class UsersController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User CreateUser(@RequestBody UserRequest userRequest) {
+    public User CreateUser(@RequestBody UserCreateRequest userRequest) {
         User user = User.builder()
                 .name(userRequest.getName())
                 .email(userRequest.getEmail())
@@ -43,6 +45,24 @@ public class UsersController {
     @ResponseStatus(HttpStatus.OK)
     public void DeleteUser(@PathVariable String userId) {
         userService.deleteUser(UUID.fromString(userId));
+    }
+
+    @GetMapping("/{userId}")
+    public User GetUser(@PathVariable String userId) {
+        return userService.getUser(UUID.fromString(userId));
+    }
+
+    @PutMapping("/{userId}")
+    public User UpdateUser(@PathVariable String userId, @RequestBody UserUpdateRequest userRequest) {
+        User user = User.builder()
+                .id(UUID.fromString(userId))
+                .name(userRequest.getName() != null ? userRequest.getName().trim() : null)
+                .email(userRequest.getEmail() != null ? userRequest.getEmail().trim().toLowerCase() : null)
+                .password(userRequest.getPassword() != null ? userRequest.getPassword() : null)
+                .build();
+
+        userService.updateUser(user);
+        return user;
     }
 
     // Should be removed or protected in production

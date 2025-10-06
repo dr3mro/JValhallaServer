@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException;
+import com.dr3mro.Valhalla.Api.Server.exceptions.UserNotFoundException;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.repositories.UserRepository;
 
@@ -38,6 +39,42 @@ public class UserService {
 
         userRepository.save(user);
         log.info("User created: {}", user.getEmail());
+    }
+
+    public User getUser(UUID userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
+    }
+
+    public void updateUser(User user) {
+
+        if (user.getId() == null) {
+            throw new IllegalArgumentException("User ID is required for update.");
+        }
+
+        // load existing entity to preserve non-updated fields and validation constraints
+        java.util.UUID id = user.getId();
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+
+        if (user.getName() != null) {
+            existing.setName(user.getName().trim());
+        }
+
+        if (user.getEmail() != null) {
+            String normalized = user.getEmail().trim().toLowerCase();
+            // if the email changes, ensure it isn't taken by someone else
+            if (!normalized.equals(existing.getEmail()) && userRepository.existsByEmailIgnoreCase(normalized)) {
+                throw new com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException(normalized);
+            }
+            existing.setEmail(normalized);
+        }
+
+        if (user.getPassword() != null) {
+            existing.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
+        userRepository.save(existing);
+        log.info("User updated: {}", existing.getEmail());
     }
 
     public List<User> listUsers() {

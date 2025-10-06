@@ -12,6 +12,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmailIgnoreCase(String email);
 
+    java.util.Optional<com.dr3mro.Valhalla.Api.Server.models.User> findByEmailIgnoreCase(String email);
+
     @Override
     void deleteById(UUID userId);
 

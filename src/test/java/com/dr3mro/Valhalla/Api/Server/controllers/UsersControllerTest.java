@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.dr3mro.Valhalla.Api.Server.dto.UserCreateRequest;
+import com.dr3mro.Valhalla.Api.Server.dto.UserResponse;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.services.UserService;
 
@@ -88,7 +89,7 @@ class UsersControllerTest {
             return null;
         }).when(userService).createUser(any(User.class));
 
-        User createdUser = usersController.CreateUser(userRequest);
+        UserResponse createdUser = usersController.CreateUser(userRequest);
         // verify create call and the created user's fields
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userService, times(1)).createUser(captor.capture());

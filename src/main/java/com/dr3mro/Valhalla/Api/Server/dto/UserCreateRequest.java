@@ -1,9 +1,9 @@
 package com.dr3mro.Valhalla.Api.Server.dto;
 
+import com.dr3mro.Valhalla.Api.Server.validation.ValidPassword;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class UserCreateRequest {
     private String email;
 
     @NotBlank
-    @Size(min = 8, max = 64)
+    @ValidPassword
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 

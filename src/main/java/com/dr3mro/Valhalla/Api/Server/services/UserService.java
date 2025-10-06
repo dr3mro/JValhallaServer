@@ -3,14 +3,12 @@ package com.dr3mro.Valhalla.Api.Server.services;
 import java.util.List;
 import java.util.UUID;
 
-import org.passay.PasswordData;
-import org.passay.PasswordValidator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.dr3mro.Valhalla.Api.Server.dto.UserResponse;
 import com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException;
-import com.dr3mro.Valhalla.Api.Server.exceptions.InvalidPasswordException;
+// removed InvalidPasswordException (validation handled by @Valid)
 import com.dr3mro.Valhalla.Api.Server.exceptions.UserNotFoundException;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.repositories.UserRepository;
@@ -25,7 +23,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final PasswordValidator passwordValidator;
 
     public User createUser(User user) {
         // normalize email
@@ -39,9 +36,7 @@ public class UserService {
         }
 
         if (user.getPassword() != null) {
-            if (!passwordIsStrong(new PasswordData(user.getPassword()))) {
-                throw new InvalidPasswordException("Invalid password constraints.");
-            }
+            // assume DTO validation already enforced password constraints (@Valid + @ValidPassword)
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
@@ -50,10 +45,7 @@ public class UserService {
         return savedUser;
     }
 
-    private boolean passwordIsStrong(PasswordData password) {
-        return passwordValidator.validate(password).isValid();
-    }
-
+    // password strength/validation is enforced via Bean Validation (@ValidPassword)
     public UserResponse getUser(UUID userId) {
         return userRepository.findById(userId).map(user -> {
             UserResponse response = new UserResponse();
@@ -89,9 +81,6 @@ public class UserService {
         }
 
         if (user.getPassword() != null) {
-            if (passwordIsInvalid(new PasswordData(user.getPassword()))) {
-                throw new InvalidPasswordException("Invalid password constraints.");
-            }
             existing.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 

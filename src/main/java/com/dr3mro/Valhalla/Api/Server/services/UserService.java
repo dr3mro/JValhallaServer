@@ -3,10 +3,14 @@ package com.dr3mro.Valhalla.Api.Server.services;
 import java.util.List;
 import java.util.UUID;
 
+import org.passay.PasswordData;
+import org.passay.PasswordValidator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.dr3mro.Valhalla.Api.Server.dto.UserResponse;
 import com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException;
+import com.dr3mro.Valhalla.Api.Server.exceptions.InvalidPasswordException;
 import com.dr3mro.Valhalla.Api.Server.exceptions.UserNotFoundException;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.repositories.UserRepository;
@@ -21,6 +25,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordValidator passwordValidator;
 
     public void createUser(User user) {
         // normalize email
@@ -34,6 +39,9 @@ public class UserService {
         }
 
         if (user.getPassword() != null) {
+            if (!passwordIsInvalid(new PasswordData(user.getPassword()))) {
+                throw new InvalidPasswordException("Invalid password constraints.");
+            }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
@@ -41,11 +49,21 @@ public class UserService {
         log.info("User created: {}", user.getEmail());
     }
 
-    public User getUser(UUID userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toString()));
+    private boolean passwordIsInvalid(PasswordData password) {
+        return passwordValidator.validate(password).isValid();
     }
 
-    public void updateUser(User user) {
+    public UserResponse getUser(UUID userId) {
+        return userRepository.findById(userId).map(user -> {
+            UserResponse response = new UserResponse();
+            response.setId(user.getId());
+            response.setName(user.getName());
+            response.setEmail(user.getEmail());
+            return response;
+        }).orElseThrow(() -> new UserNotFoundException(userId.toString()));
+    }
+
+    public void updateUser(UserResponse user) {
 
         if (user.getId() == null) {
             throw new IllegalArgumentException("User ID is required for update.");
@@ -64,12 +82,15 @@ public class UserService {
             String normalized = user.getEmail().trim().toLowerCase();
             // if the email changes, ensure it isn't taken by someone else
             if (!normalized.equals(existing.getEmail()) && userRepository.existsByEmailIgnoreCase(normalized)) {
-                throw new com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException(normalized);
+                throw new DuplicateEmailException(normalized);
             }
             existing.setEmail(normalized);
         }
 
         if (user.getPassword() != null) {
+            if (passwordIsInvalid(new PasswordData(user.getPassword()))) {
+                throw new InvalidPasswordException("Invalid password constraints.");
+            }
             existing.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 

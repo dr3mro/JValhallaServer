@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dr3mro.Valhalla.Api.Server.dto.UserCreateRequest;
+import com.dr3mro.Valhalla.Api.Server.dto.UserResponse;
 import com.dr3mro.Valhalla.Api.Server.dto.UserUpdateRequest;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.services.UserService;
@@ -48,21 +49,21 @@ public class UsersController {
     }
 
     @GetMapping("/{userId}")
-    public User GetUser(@PathVariable String userId) {
+    public UserResponse GetUser(@PathVariable String userId) {
         return userService.getUser(UUID.fromString(userId));
     }
 
     @PutMapping("/{userId}")
-    public User UpdateUser(@PathVariable String userId, @RequestBody UserUpdateRequest userRequest) {
-        User user = User.builder()
+    public UserResponse UpdateUser(@PathVariable String userId, @RequestBody UserUpdateRequest userRequest) {
+        UserResponse response = UserResponse.builder()
                 .id(UUID.fromString(userId))
                 .name(userRequest.getName() != null ? userRequest.getName().trim() : null)
                 .email(userRequest.getEmail() != null ? userRequest.getEmail().trim().toLowerCase() : null)
                 .password(userRequest.getPassword() != null ? userRequest.getPassword() : null)
                 .build();
 
-        userService.updateUser(user);
-        return user;
+        userService.updateUser(response);
+        return response;
     }
 
     // Should be removed or protected in production

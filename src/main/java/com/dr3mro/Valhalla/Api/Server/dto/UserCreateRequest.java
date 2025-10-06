@@ -19,7 +19,7 @@ public class UserCreateRequest {
     private String email;
 
     @NotBlank
-    @Size(min = 8, max = 72)
+    @Size(min = 8, max = 64)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 

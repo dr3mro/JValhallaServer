@@ -1,5 +1,7 @@
 package com.dr3mro.Valhalla.Api.Server.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.dr3mro.Valhalla.Api.Server.models.User;
@@ -18,5 +20,9 @@ public class UserService {
     public void createUser(User user) {
         userRepository.save(user);
         log.info("User created: {}", user.getEmail());
+    }
+
+    public List<User> listUsers() {
+        return userRepository.findAll();
     }
 }

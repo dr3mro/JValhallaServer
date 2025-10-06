@@ -62,16 +62,16 @@ public class UsersController {
     }
 
     @PutMapping("/{userId}")
-    public UserResponse UpdateUser(@PathVariable String userId, @RequestBody UserUpdateRequest userRequest) {
-        UserResponse response = UserResponse.builder()
+    public UserResponse UpdateUser(@PathVariable String userId, @Valid @RequestBody UserUpdateRequest userRequest) {
+        User user = User.builder()
                 .id(UUID.fromString(userId))
                 .name(userRequest.getName() != null ? userRequest.getName().trim() : null)
                 .email(userRequest.getEmail() != null ? userRequest.getEmail().trim().toLowerCase() : null)
                 .password(userRequest.getPassword() != null ? userRequest.getPassword() : null)
                 .build();
 
-        userService.updateUser(response);
-        return response;
+        return userService.updateUser(user);
+
     }
 
     // Should be removed or protected in production

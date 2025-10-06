@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.dr3mro.Valhalla.Api.Server.dto.UserResponse;
 import com.dr3mro.Valhalla.Api.Server.exceptions.DuplicateEmailException;
-// removed InvalidPasswordException (validation handled by @Valid)
 import com.dr3mro.Valhalla.Api.Server.exceptions.UserNotFoundException;
 import com.dr3mro.Valhalla.Api.Server.models.User;
 import com.dr3mro.Valhalla.Api.Server.repositories.UserRepository;
@@ -56,7 +55,7 @@ public class UserService {
         }).orElseThrow(() -> new UserNotFoundException(userId.toString()));
     }
 
-    public void updateUser(UserResponse user) {
+    public UserResponse updateUser(User user) {
 
         if (user.getId() == null) {
             throw new IllegalArgumentException("User ID is required for update.");
@@ -84,8 +83,13 @@ public class UserService {
             existing.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
-        userRepository.save(existing);
-        log.info("User updated: {}", existing.getEmail());
+        User updatedUser = userRepository.save(existing);
+
+        return UserResponse.builder()
+                .id(updatedUser.getId())
+                .name(updatedUser.getName())
+                .email(updatedUser.getEmail())
+                .build();
     }
 
     public List<User> listUsers() {

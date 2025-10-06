@@ -1,5 +1,9 @@
 package com.dr3mro.Valhalla.Api.Server.models;
 
+import java.util.UUID;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,8 +35,10 @@ import lombok.ToString;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "UUID")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    private UUID id;
 
     @NotBlank
     @Length(min = 8, max = 100)

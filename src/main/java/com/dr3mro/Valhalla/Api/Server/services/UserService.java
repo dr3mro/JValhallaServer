@@ -1,6 +1,7 @@
 package com.dr3mro.Valhalla.Api.Server.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,5 +42,10 @@ public class UserService {
 
     public List<User> listUsers() {
         return userRepository.findAll();
+    }
+
+    public void deleteUser(UUID userId) {
+        userRepository.deleteById(userId);
+        log.info("User deleted: {}", userId);
     }
 }

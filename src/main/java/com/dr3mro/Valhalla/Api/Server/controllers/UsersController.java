@@ -36,6 +36,7 @@ public class UsersController {
         return user;
     }
 
+    // Should be removed or protected in production
     @GetMapping
     public List<User> ListUsers() {
         return userService.listUsers();

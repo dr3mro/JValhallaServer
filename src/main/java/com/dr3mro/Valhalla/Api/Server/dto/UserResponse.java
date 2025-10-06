@@ -2,7 +2,6 @@ package com.dr3mro.Valhalla.Api.Server.dto;
 
 import java.util.UUID;
 
-import com.dr3mro.Valhalla.Api.Server.validation.ValidPassword;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -25,6 +24,5 @@ public class UserResponse {
     private String email;
 
     @JsonIgnore
-    @ValidPassword
     private String password;
 }

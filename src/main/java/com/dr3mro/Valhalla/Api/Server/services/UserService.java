@@ -92,8 +92,14 @@ public class UserService {
                 .build();
     }
 
-    public List<User> listUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> listUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build())
+                .toList();
     }
 
     public void deleteUser(UUID userId) {

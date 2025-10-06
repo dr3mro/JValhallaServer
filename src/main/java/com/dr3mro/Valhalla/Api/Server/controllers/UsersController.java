@@ -76,7 +76,7 @@ public class UsersController {
 
     // Should be removed or protected in production
     @GetMapping
-    public List<User> ListUsers() {
+    public List<UserResponse> ListUsers() {
         return userService.listUsers();
     }
 
